@@ -1,24 +1,35 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Project V2.0</title>
-    <script src="jspsych.js"></script>
-    <script src="jspsych-html-keyboard-response.js"></script>
-    <link href="jspsych.css" rel="stylesheet" type="text/css"></link>
-    <script src="jspsych-image-keyboard-response.js"></script>
-    <script src="jspsych-call-function.js"></script>
-    <script src="input_key_function.js"></script>
-
+    <title>Trial</title>
+    <script src="jspsych-6.0.5/jspsych.js"></script>
+    <script src="jspsych-6.0.5/plugins/jspsych-html-keyboard-response.js"></script>
+    <link href="jspsych-6.0.5/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+    <script src="jspsych-6.0.5/plugins/jspsych-image-keyboard-response.js"></script>
+    <script src="jspsych-6.0.5/plugins/jspsych-call-function.js"></script>
+    <script src="input_key_function3.js"></script>
+    <script src="save_data.js"></script>
+    <script src="jspsych-6.0.5/plugins/jspsych-animation.js"></script>
   </head>
   <p id="demo"></p>
   <body></body>
   <script>
 
-
-//---------------------------------------------------------------------------------------------------------------------
-var m=0;
-const z = new Array(4);
-const matrix = [
+//---------------------Definition of variables--------------------------------------------------------------------------------
+var z = new Array(4); //Array where inputs are saved
+var m=0;              //Index of z
+var w =0;             //Flag for matrix-index-comparison (Evaluation 1 or 2)
+var s = 0;            //all_states' index
+var g = 1;            //Flag for matrix-index-comparison (for evaluation 2)
+var p = new Array(4); //Variable to save the las value of all_states
+var b = false;        // flag for correct keys pressed / skipping to next block
+var a = 0;            // variable for number of keys pressed
+var c = 0;            // variable for spacebar pressed
+var target;           //the value of the target to reach
+var random_value = Math.floor(Math.random() * 2); //Variable that gives 0 or 1 randomly (for calculation the target)
+var random_state = Math.floor(Math.random() * 6); //Variable that gives values between 0 and 5 (initial State)
+var random_number = Math.floor(Math.random() * 4);// Variabe that chooses the folder of images (0 to 3)
+const matrix = [                    //Matrix used for the comparison and evaluation of the inputs
                  [0,1,0,0,2,0],
                  [0,0,1,0,0,2],
                  [2,0,0,1,0,0],
@@ -26,154 +37,219 @@ const matrix = [
                  [0,0,2,0,0,1],
                  [1,0,0,2,0,0]
                ];
-
-
-var initialState = 0;
-var keyinputs = [[2],[2], [1], [1]];
-//var keyinputs = new Array(4);
-var all_states = [initialState];
-var tmp = matrix[initialState];
-var tmp_state = [initialState];
-var flag = 0;
-var tmppath = all_states;
-//---------------------------------------------------------------------------------------------------------------------
+var initialState = 0;             //Value of the initial state
+var keyinputs = [];               //Array for saving the inputs
+var all_states = new Array (4);   //Array where the states will be saved
+var tmp_state = [random_state];   //The variable used in the function of matrix comparison
+var new_state;       //Saves the new target value
+all_states[0] = random_state;     //The first value is assigned randomly
+// var tmp_state = [initialState];
+// var tmp = matrix[initialState];
+// var flag = 0;
+// var tmppath = all_states;
+//---------------------------------------------------------------------------------------------------------------------------
+//------------------------Variables of jspsych-------------------------------------------------------------------------------
       var trials = [];
       var timeline = [];
       var images = [
-      "img/1.png", "img/2.png", "img/3.png", "img/4.png",
-      "img/5.png", "img/6.png"
-      ];
+          random_number+"/0.png", random_number+"/1.png", random_number+"/2.png",
+          random_number+"/3.png", random_number+"/4.png", random_number+"/5.png"];
+random_targets(); //Calculation of the target state based on the initial state
+//---------------------------------------------------------------------------------------------------------------------------
 
+//---------Main instructions-------------------------------------------------------------------------------------------------
       var instructions = {
-      type: "html-keyboard-response",
-      stimulus: "<p>Waiting for the inputs</p> "+
-      "Press the keys F or J to select your path.</p> " +
-      "<p>You can only choose 4 inputs.</p>" +
-      "<p>Then press Spacebar to confirm.</p>" +
-      "<p>The images will be displayed </p> ",
-      choices: [32],
-      post_trial_gap: 1000
+        type: "html-keyboard-response",
+        stimulus: "<p>In the next screen you will have to choose 4 inputs with the keys F and J.</p>" +
+        "<p class='small'><strong>You only have 5 seconds to choose your inputs.</strong></p></div>" +
+        "<p>After selecting your inputs you need to confirm by pressing space bar.</p>" +
+        "<p>If you do not choose your inputs within the mentioned time and press space bar," +
+        "<strong> you will be skipped to the next block.</strong></p> " +
+            "<p class='small'><strong>Press Enter to continue</strong></p></div>",
+        choices: [13], // 13 Enter
+        post_trial_gap: 1000
       };
-      timeline.push(instructions);
+      // timeline.push(PRE_instructions);
+//---------------------------------------------------------------------------------------------------------------------------
 
-      var evaluation = function (){
-          for (var i = 0; i < all_states.length;) {
-            var tmppath = all_states[i];
-            i++}
+//----------Calculation of the new target-------------------------------------------------------------------------------
+      var new_target_function = function (){
+        new_state = all_states[0];
+        random_targets();
+      }
+      var new_target = {
+        type: 'call-function',
+        func: new_target_function
+      }
+//----------------------------------------------------------------------------------------------------------------------------
+
+//-----------Inputs selection and displaying initial and goal image-----------------------------------------------------------
+      var initial_goal_images = {
+        type: "html-keyboard-response",
+        stimulus: function () {return "<p class='small'><strong></strong></p></div>" +
+        "<div style='width: 700px;'>"+
+        "<div style='float: left;'><img src='" + images[all_states[0]] + "'></img>"+
+        "<p class='small'><strong>Your current image</strong></p></div>" +
+        "<div class='float: right;'><img src='"+random_number+"/"+ target +".png'></img>" +
+        "<p class='small'><strong>Your goal</strong></p></div>" +
+        "<p class='small'><strong></strong></p></div>" +
+        "</div>"+
+        "<p class='small'><strong></strong></p></div>" +
+        "<p>Choose other 4 inputs with F and J and press spacebar to continue.</p>" +
+        "<p>You only have 5 seconds to choose.</p>"},
+        choices: [32], //32 spacebar
+        // trial_duration: function(){
+        //   return jsPsych.randomization.sampleWithoutReplacement([5000], 1)[0];},
+        post_trial_gap: 1000
+      }
+      // timeline.push(instructions2);
+//----------------------------------------------------------------------------------------------------------------------------
+
+//----------Evaluation of keys pressed / inputs-------------------------------------------------------------------------------
+      var keys_pressed = function (){
+        if (a == 4)
+        {
+          if (c == 1) {b = false;}
+          else        {b = true;}
+        }
+        else if (a != 4) {b = true;}
+      }
+      var check_keys_pressed = {
+        type: 'call-function',
+        func: keys_pressed
+      }
+//----------------------------------------------------------------------------------------------------------------------------
+
+//-------------------Displaying image function--------------------------------------------------------------------------------
+      var image_display = {
+        type: 'image-keyboard-response',
+        choices: jsPsych.NO_KEYS,
+        prompt: '<p>Display of images.</p>',
+        stimulus: function () {return images[all_states[s]];},
+        trial_duration: function(){
+          return jsPsych.randomization.sampleWithoutReplacement([1000], 1)[0];},
+      }
+//----------------------------------------------------------------------------------------------------------------------------
+
+//----------------Increase the value of images index (index of all_states) function------------------------------------------------------
+      var increase_S = function (){
+          s++
+          console.log(s);
           }
 
-
-      var callFunct = {
+      var increase_image_index = {
           type: 'call-function',
-          func: evaluation
+          func: increase_S
       }
-      timeline.push(callFunct);
+//----------------------------------------------------------------------------------------------------------------------------
 
+//-----------Function that displays the whole secuence of images--------------------------------------------------------------
+      var images_sequence = {
+          timeline: [image_display, increase_image_index],
+          repetitions: 5,
+          randomize_order: false
+      }
+//----------------------------------------------------------------------------------------------------------------------------
 
-      var block = {
+//---------------Decrease image index (all_states index)--------------------------------------------------------------------------------
+      var decrease_S = function (){
+          if (s >=1)
+            {return s--;}
+          else if (s = 0)
+            {return s = 0;}
+      }
+
+      var decrease_image_index = {
+          type: 'call-function',
+          func: decrease_S
+      }
+//----------------------------------------------------------------------------------------------------------------------------
+
+//---------------Tick or cross display function-------------------------------------------------------------------------------
+      var correct_goal = {
         type: 'image-keyboard-response',
-        //choices: ['m'],
-        choices: jsPsych.NO_KEYS,
-        prompt: '<p>Display of images.</p>',
-        stimulus: function (){
-              return images[tmppath[0]];
-            },
-        trial_duration: function(){
-          return jsPsych.randomization.sampleWithoutReplacement([1000], 1)[0];
+        stimulus: function () {
+          if (all_states[0] == target)
+              { return 'img/tick.png'}
+            else {return "img/cross.png"}
         },
-        on_finish: function(data) {
-          if (data.key_press == 40) {
-            jsPsych.endCurrentTimeline();
-          }},
-      }
-      timeline.push(block);
-
-      var block2 = {
-        type: 'image-keyboard-response',
-        //choices: ['m'],
         choices: jsPsych.NO_KEYS,
-        prompt: '<p>Display of images.</p>',
-        stimulus: function (){
-              return images[tmppath[1]];
-            },
         trial_duration: function(){
-          return jsPsych.randomization.sampleWithoutReplacement([1000], 1)[0];},
-        on_finish: function(data) {
-          if (data.key_press == 40) {
-            jsPsych.endCurrentTimeline();
-          }},
+           return jsPsych.randomization.sampleWithoutReplacement([2000], 1)[0];},
+        post_trial_gap: 0
       }
-      timeline.push(block2);
+//----------------------------------------------------------------------------------------------------------------------------
 
-      var block3 = {
-        type: 'image-keyboard-response',
-        //choices: ['m'],
-        choices: jsPsych.NO_KEYS,
-        prompt: '<p>Display of images.</p>',
-        stimulus: function (){
-              return images[tmppath[2]];
-            },
-        trial_duration: function(){
-          return jsPsych.randomization.sampleWithoutReplacement([1000], 1)[0];},
-        on_finish: function(data) {
-          if (data.key_press == 40) {
-            jsPsych.endCurrentTimeline();
-          }},
+//------------Last value of all_states saved and S is reset-------------------------------------------------------------------
+      var save_last_value_and_reset = function (){
+           p[0] = all_states[s];
+           all_states = [];
+           all_states[0] = p[0];
+           s = 0;
+           a = 0;
+           c = 0;
+           // all_states[0] = all_states[s];
+           console.log(all_states);
+          }
+
+      var update_values = {
+          type: 'call-function',
+          func: save_last_value_and_reset
       }
-      timeline.push(block3);
+//---------------------------------------------------------------------------------------------------------------------------
 
-      var block4 = {
-        type: 'image-keyboard-response',
-        //choices: ['m'],
-        choices: jsPsych.NO_KEYS,
-        prompt: '<p>Display of images.</p>',
-        stimulus: function (){
-              return images[tmppath[3]];
-            },
-        trial_duration: function(){
-          return jsPsych.randomization.sampleWithoutReplacement([1000], 1)[0];
-        },
-        on_finish: function(data) {
-          if (data.key_press == 40) {
-            jsPsych.endCurrentTimeline();
-          }},
+//---------All functions cycles----------------------------------------------------------------------------------------------
+      var sub_block = {
+        timeline: [images_sequence, decrease_image_index, update_values, correct_goal],
+        repetitions: 1,
+        randomize_order: false
       }
-      timeline.push(block4);
+//---------------------------------------------------------------------------------------------------------------------------
 
-      var block5 = {
-        type: 'image-keyboard-response',
-        //choices: ['m'],
-        choices: jsPsych.NO_KEYS,
-        prompt: '<p>Display of images.</p>',
-        stimulus: function (){
-              return images[tmppath[4]];
-            },
-        trial_duration: function(){
-          return jsPsych.randomization.sampleWithoutReplacement([1000], 1)[0];
-        },
-        on_finish: function(data) {
-          if (data.key_press == 40) {
-            jsPsych.endCurrentTimeline();
-          }},
+//-------------Skip function-------------------------------------------------------------------------------------------------
+      var skip_function = {
+          timeline: [sub_block],
+          conditional_function: function(){
+              if(b == true){
+                  b = false;
+                  a = 0;
+                  c = 0;
+                  return false;
+              } else {return true;}       }
       }
-      timeline.push(block4);
+//---------------------------------------------------------------------------------------------------------------------------
 
+//---------All functions cycles----------------------------------------------------------------------------------------------
+      var main_block = {
+        timeline: [new_target, initial_goal_images, check_keys_pressed, skip_function],
+        repetitions: 3,
+        randomize_order: false
+      }
+// timeline.push(main_block);
+//---------------------------------------------------------------------------------------------------------------------------
 
-
+//----------Final message of the trial---------------------------------------------------------------------------------------
       var after_block = {
         type: 'html-keyboard-response',
-        stimulus: '<p>The trial is finished.</p>'+
-        '<p>Press any key to view the results.</p>',
+        stimulus: '<p>The trial is finished.</p>',
+        //'<p>Press any key to view the results.</p>',
         is_html: true
       }
-      timeline.push(after_block);
+      // timeline.push(after_block);
+//----------------------------------------------------------------------------------------------------------------------------
 
+//------------Last function,  display and save data on a file-----------------------------------------------------------------
       jsPsych.init({
-        timeline: timeline,
+        // timeline: timeline,
+        timeline: [ instructions, main_block, after_block],
         on_finish: function() {
+          //jsPsych.data.get().localSave('csv','mydata.csv');
           jsPsych.data.displayData();
-        }
-      });
-
+        //}
+        //-----
+        //   on_finish: saveData  //save data to a file function
+        // });
+      }});
+//----------------------------------------------------------------------------------------------------------------------------
 </script>
 </html>
