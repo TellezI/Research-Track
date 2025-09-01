@@ -1,6 +1,5 @@
 # Cognitive Path Planning and Memory Task (Research Project)
 
-This repository contains the implementation and results of a cognitive experiment developed as part of my Master’s studies at **Otto von Guericke University Magdeburg**.  
 The project aimed to design, test, and analyze a cognitive task inspired by [Kurth-Nelson et al., 2016](http://dx.doi.org/10.1016/j.neuron.2016.05.028), exploring **path planning** and **memory** through a trial-based paradigm.
 
 ---
