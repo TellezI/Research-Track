@@ -46,7 +46,7 @@ The task was implemented in **JavaScript** using the [jsPsych](https://www.jspsy
 
 <p align="center">
   <img src="figures/script.png" width="400"><br>
-  <em>Table 1. Elements of the main script.</em>
+  <em>Elements of the main script.</em>
 </p>
 
 ---
